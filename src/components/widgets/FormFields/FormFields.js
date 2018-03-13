@@ -13,7 +13,28 @@ const InputField = styled.input`
   font-weight: 300;
 `;
 
+const FormFieldError = styled.div`
+  color: #ff5722;
+  font-weight: 500;
+  margin-top: 5px;
+  padding: 5px;
+`;
+
 const FormField = ({ formdata, change, id }) => {
+  const showError = () => {
+    let errorMessage = null;
+
+    if(formdata.validation && !formdata.valid && formdata.touched) {
+      errorMessage = (
+        <FormFieldError>
+          { formdata.validationMessage }
+        </FormFieldError>
+      );
+    }
+
+    return errorMessage;
+  }
+
   const renderTemplate = () => {
     let formTemplate = null;
 
@@ -27,6 +48,7 @@ const FormField = ({ formdata, change, id }) => {
               onChange={(event) => change({ event, id, blur: false })}
               onBlur={(event) => change({ event, id, blur: true })}
             />
+            { showError() }
           </FormFieldWrapper>
         );
         break;

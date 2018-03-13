@@ -65,10 +65,41 @@ class SignIn extends Component {
     }
 
     newElement.value = element.event.target.value;
+
+    if(element.blur) {
+      let validData = this.validate(newElement);
+      [newElement.valid, newElement.validationMessage] = validData;
+    }
+
+    newElement.touched = element.blur;
     newFormData[element.id] = newElement;
     this.setState({
       formdata: newFormData
     });
+  }
+  
+  validate = (element) => {
+    let error = [true, ''];
+
+    if(element.validation.email) {
+      const valid = /\S+@\S+\.\S+/.test(element.value);
+      const message = `${!valid ? 'Must be valid email': ''}`;
+      error = !valid ? [valid, message] : error;
+    }
+
+    if(element.validation.password) {
+      const valid = element.value.length >= 5;
+      const message = `${!valid ? 'Must be greater than 5 characters': ''}`;
+      error = !valid ? [valid, message] : error;
+    }
+
+    if(element.validation.required) {
+      const valid = element.value.trim() !== '';
+      const message = `${!valid ? 'This field is required': ''}`;
+      error = !valid ? [valid, message] : error;
+    }
+
+    return error;
   }
 
   render() {
