@@ -10,6 +10,8 @@ import Layout from './hoc/Layout/layout';
 
 class Routes extends Component {
   render() {
+    console.log(this.props);
+
     return (
       <Layout>
         <Switch>

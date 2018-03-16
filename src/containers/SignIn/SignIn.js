@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import styled from 'styled-components';
 import FormField from '../../components/widgets/FormFields/FormFields';
+import { firebase } from '../../firebase';
 
 const LogContainer = styled.div`
   width: 80%;
@@ -13,6 +14,22 @@ const FormTitle = styled.h2`
   font-weight: 300;
   font-size: 35px;
   text-align: center;
+`;
+
+const FormButton = styled.button`
+  background: #03a9f4;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  padding: 10px;
+  color: #fff;
+  margin-top: 10px;
+`;
+
+const FormError = styled.div`
+  color: red;
+  font-size: 14px;
+  padding: 10px 0;
 `;
 
 class SignIn extends Component {
@@ -66,7 +83,7 @@ class SignIn extends Component {
 
     newElement.value = element.event.target.value;
 
-    if(element.blur) {
+    if (element.blur) {
       let validData = this.validate(newElement);
       [newElement.valid, newElement.validationMessage] = validData;
     }
@@ -74,49 +91,123 @@ class SignIn extends Component {
     newElement.touched = element.blur;
     newFormData[element.id] = newElement;
     this.setState({
-      formdata: newFormData
+      formdata: newFormData,
+      registerError: ''
     });
   }
-  
+
   validate = (element) => {
     let error = [true, ''];
 
-    if(element.validation.email) {
+    if (element.validation.email) {
       const valid = /\S+@\S+\.\S+/.test(element.value);
-      const message = `${!valid ? 'Must be valid email': ''}`;
+      const message = `${!valid ? 'Must be valid email' : ''}`;
       error = !valid ? [valid, message] : error;
     }
 
-    if(element.validation.password) {
+    if (element.validation.password) {
       const valid = element.value.length >= 5;
-      const message = `${!valid ? 'Must be greater than 5 characters': ''}`;
+      const message = `${!valid ? 'Must be greater than 5 characters' : ''}`;
       error = !valid ? [valid, message] : error;
     }
 
-    if(element.validation.required) {
+    if (element.validation.required) {
       const valid = element.value.trim() !== '';
-      const message = `${!valid ? 'This field is required': ''}`;
+      const message = `${!valid ? 'This field is required' : ''}`;
       error = !valid ? [valid, message] : error;
     }
 
     return error;
   }
 
+  submitForm = (event, type) => {
+    event.preventDefault();
+    if(type !== null) {
+      let dataToSubmit = {};
+      let formIsValid = true;
+
+      for(let key in this.state.formdata) {
+        dataToSubmit[key] = this.state.formdata[key].value;
+      }
+
+      for(let key in this.state.formdata) {
+        formIsValid = this.state.formdata[key].valid && formIsValid;
+      }
+      
+      if(formIsValid) {
+        this.setState({
+          loading: true,
+          registerError: ''
+        });
+        
+        if(type) {
+          firebase.auth().signInWithEmailAndPassword(
+            dataToSubmit.email,
+            dataToSubmit.password
+          ).then(() => {
+            this.props.history.push('/');
+          }).catch(error => {
+            this.setState({
+              loading: false,
+              registerError: error.message
+            });
+          });
+        } else {
+          firebase.auth().createUserWithEmailAndPassword(
+            dataToSubmit.email,
+            dataToSubmit.password
+          ).then(() => {
+            this.props.history.push('/');
+          }).catch(error => {
+            this.setState({
+              loading: false,
+              registerError: error.message
+            });
+          });
+        }
+      }
+    }
+  }
+
+  submitButton = () => (
+    this.state.loading
+      ? 'Loading...'
+      :
+      <div>
+        <FormButton onClick={(event) => { this.submitForm(event, false) }}>Register now</FormButton>{' '}
+        <FormButton onClick={(event) => { this.submitForm(event, true) }}>Log in</FormButton>
+      </div>
+  );
+
+  showError = () => (
+    this.state.registerError ?
+      <FormError>
+        { this.state.registerError }
+      </FormError> :
+      null
+  );
+
   render() {
     return (
       <LogContainer>
-        <form>
+        <form onSubmit={(event) => { this.submitForm(event, null) }}>
           <FormTitle>Register / Log in</FormTitle>
           <FormField
             id={'email'}
             formdata={this.state.formdata.email}
-            change={(element) => { this.updateFrom(element) }}
+            change={(element) => {
+              this.updateFrom(element)
+            }}
           />
           <FormField
             id={'password'}
             formdata={this.state.formdata.password}
-            change={(element) => { this.updateFrom(element) }}
+            change={(element) => {
+              this.updateFrom(element)
+            }}
           />
+          { this.submitButton() }
+          { this.showError() }
         </form>
       </LogContainer>
     );
