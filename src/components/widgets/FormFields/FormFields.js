@@ -1,24 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
-
-const FormFieldWrapper = styled.div`
-  margin: 10px 0 0;
-`;
-
-const InputField = styled.input`
-  font-size: 17px;
-  width: 100%;
-  padding: 12px 10px;
-  box-sizing: border-box;
-  font-weight: 300;
-`;
-
-const FormFieldError = styled.div`
-  color: #ff5722;
-  font-weight: 500;
-  margin-top: 5px;
-  padding: 5px;
-`;
+import { FormFieldWrapper, FormFieldError, InputField, FormSelect } from './styled';
 
 const FormField = ({ formdata, change, id }) => {
   const showError = () => {
@@ -52,6 +33,27 @@ const FormField = ({ formdata, change, id }) => {
           </FormFieldWrapper>
         );
         break;
+      case 'select':
+        formTemplate = (
+          <FormFieldWrapper>
+            <FormSelect
+              value={formdata.value}
+              name={formdata.config.name}
+              onChange={(event) => change({ event, id, blur: false })}
+              onBlur={(event) => change({ event, id, blur: true })}
+            >
+              { formdata.config.options.map((opt, idx) => (
+                <option
+                  key={idx}
+                  value={opt.id}
+                >
+                  {opt.name}
+                </option>
+              )) }
+            </FormSelect>
+          </FormFieldWrapper>
+        );
+        break;
       default:
         formTemplate = null;
     }
@@ -60,9 +62,7 @@ const FormField = ({ formdata, change, id }) => {
   }
 
   return (
-    <div>
-      { renderTemplate() }
-    </div>
+    renderTemplate()
   );
 }
 

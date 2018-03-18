@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import styled from 'styled-components';
 import FormField from '../../components/widgets/FormFields/FormFields';
+import { FormButton, FormFieldError, FormTitle } from '../../components/widgets/FormFields/styled';
 import { firebase } from '../../firebase';
 
 const LogContainer = styled.div`
@@ -8,28 +9,6 @@ const LogContainer = styled.div`
   margin: 0 auto;
   padding-top: 50px;
   height: 100vh;
-`;
-
-const FormTitle = styled.h2`
-  font-weight: 300;
-  font-size: 35px;
-  text-align: center;
-`;
-
-const FormButton = styled.button`
-  background: #03a9f4;
-  border: none;
-  border-radius: 4px;
-  font-size: 13px;
-  padding: 10px;
-  color: #fff;
-  margin-top: 10px;
-`;
-
-const FormError = styled.div`
-  color: red;
-  font-size: 14px;
-  padding: 10px 0;
 `;
 
 class SignIn extends Component {
@@ -181,9 +160,9 @@ class SignIn extends Component {
 
   showError = () => (
     this.state.registerError ?
-      <FormError>
+      <FormFieldError>
         { this.state.registerError }
-      </FormError> :
+      </FormFieldError> :
       null
   );
 
