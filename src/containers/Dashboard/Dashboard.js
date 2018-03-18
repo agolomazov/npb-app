@@ -8,6 +8,8 @@ import { Editor } from 'react-draft-wysiwyg';
 import { EditorState, convertFromRaw, convertToRaw } from 'draft-js';
 import { stateToHTML } from 'draft-js-export-html';
 
+import Uploader from '../../components/widgets/FileUploader/fileUploader';
+
 const PostContainer = styled.div`
   width: 80%;
   margin: 0 auto;
@@ -54,6 +56,11 @@ class Dashboard extends Component {
       },
       body: {
         element: 'texteditor',
+        value: '',
+        valid: true
+      },
+      image: {
+        element: 'image',
         value: '',
         valid: true
       },
@@ -193,6 +200,10 @@ class Dashboard extends Component {
     })
   }
 
+  storeFilename = (filename) => {
+    this.updateFrom({ id: 'image' }, filename)
+  }
+
   componentDidMount(){
     this.loadTeams();
   }
@@ -202,6 +213,11 @@ class Dashboard extends Component {
       <PostContainer>
         <form >
           <FormTitle>Add post</FormTitle>
+
+          <Uploader
+            filename={ (filename) => this.storeFilename(filename) }
+          />
+
           <FormField
             id={'author'}
             formdata={this.state.formdata.author}
