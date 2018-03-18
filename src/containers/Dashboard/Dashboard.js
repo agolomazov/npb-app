@@ -208,7 +208,7 @@ class Dashboard extends Component {
       response.forEach(child => {
         teams.push({
           id: child.val().teamId,
-          name: child.val().city
+          name: `${child.val().city} ${child.val().name}`
         })
       })
       const newFormData = {...this.state.formdata};
