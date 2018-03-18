@@ -2,7 +2,7 @@ import React, {Component, Fragment} from 'react';
 import {withRouter} from 'react-router-dom';
 import Header from './header';
 import styled from 'styled-components';
-import { firebaseDB, firebaseLooper, firebaseTeams } from '../../../../firebase';
+import { firebaseDB, firebaseLooper, firebaseTeams, firebase } from '../../../../firebase';
 
 const ArticleBody = styled.div`
   background: #fff;
@@ -36,7 +36,8 @@ const ArticleText = styled.div`
 class NewsArticles extends Component {
   state = {
     article: null,
-    team: null
+    team: null,
+    imageURL: ''
   }
 
   async componentDidMount() {
@@ -52,9 +53,26 @@ class NewsArticles extends Component {
             article,
             team: team[0]
           });
+          this.getImageURL(article.image)
         })
       })
     ;
+  }
+
+  getImageURL = (filename) => {
+    firebase.storage()
+      .ref('images')
+      .child(filename)
+      .getDownloadURL()
+      .then(url => {
+        this.setState({
+          imageURL: url
+        })
+      }).catch(() => {
+       this.setState({
+         imageURL: `/images/articles/${filename}`
+       });
+    })
   }
 
   render() {
@@ -76,11 +94,13 @@ class NewsArticles extends Component {
         <ArticleBody>
           <ArticleTitle>{ article.title }</ArticleTitle>
           <ArticleImage style={{
-            backgroundImage: `url(/images/articles/${article.image})`
+            backgroundImage: `url(${this.state.imageURL})`
           }} />
-          <ArticleText>
-            { article.body }
-          </ArticleText>
+          <ArticleText
+            dangerouslySetInnerHTML={{
+              __html: article.body
+            }}
+          />
         </ArticleBody>
       );
     }

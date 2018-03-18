@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import FormField from '../../components/widgets/FormFields/FormFields';
 import { FormButton, FormFieldError, FormTitle } from '../../components/widgets/FormFields/styled';
-import { firebaseTeams } from '../../firebase';
+import { firebaseTeams, firebaseArticles, firebase } from '../../firebase';
 
 import { Editor } from 'react-draft-wysiwyg';
 import { EditorState, convertFromRaw, convertToRaw } from 'draft-js';
@@ -64,7 +64,7 @@ class Dashboard extends Component {
         value: '',
         valid: true
       },
-      teams: {
+      team: {
         element: 'select',
         value: '',
         config: {
@@ -137,8 +137,31 @@ class Dashboard extends Component {
 
     if(formIsValid) {
       this.setState({
-        postError: ''
+        postError: '',
+        loading: true,
       });
+
+      firebaseArticles
+        .orderByChild('id')
+        .limitToLast(1).once('value')
+        .then(snapshot => {
+          let articleId = null;
+          snapshot.forEach(child => {
+            articleId = child.val().id
+          });
+
+          dataToSubmit['date'] = firebase.database.ServerValue.TIMESTAMP;
+          dataToSubmit['id'] = articleId + 1;
+          dataToSubmit['team'] = parseInt(dataToSubmit['team']);
+
+          firebaseArticles.push(dataToSubmit).then(article => {
+            this.props.history.push(`articles/${article.key}`);
+          }).catch(error => {
+            this.setState({
+              postError: error.message
+            });
+          });
+        });
     } else {
       console.log('form is not valid');
       this.setState({
@@ -189,11 +212,11 @@ class Dashboard extends Component {
         })
       })
       const newFormData = {...this.state.formdata};
-      const newElement = {...newFormData['teams']};
+      const newElement = {...newFormData['team']};
       newElement.config.options = teams.splice(0, 29);
       newElement.value = '0';
       newElement.valid = true;
-      newFormData['teams'] = {...newElement};
+      newFormData['team'] = {...newElement};
       this.setState({
         formdata: newFormData
       });
@@ -241,8 +264,8 @@ class Dashboard extends Component {
           />
 
           <FormField
-            id={'teams'}
-            formdata={this.state.formdata.teams}
+            id={'team'}
+            formdata={this.state.formdata.team}
             change={(element) => {
               this.updateFrom(element)
             }}

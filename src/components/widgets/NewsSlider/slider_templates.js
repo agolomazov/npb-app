@@ -19,6 +19,7 @@ const SlideImage = styled.div`
   height: 330px;
   background-size: cover !important;
   background-repeat: no-repeat !important;
+  background-position: center;
 `;
 
 const SlideCaption = styled.div`
@@ -50,7 +51,7 @@ const SliderTemplates = (props) => {
           <Slide>
             <SlideImage
               style={{
-                backgroundImage: `url(images/articles/${item.image})`
+                backgroundImage: `url(${item.image})`
               }}
             />
             <SlideLink to={`/articles/${item.id}`} >
